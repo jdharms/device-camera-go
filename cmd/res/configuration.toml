@@ -4,7 +4,7 @@ Port = 49990
 ConnectRetries = 3
 HealthCheck = "/api/v1/ping"
 Labels = []
-OpenMsg = "Bosch Camera device service started"
+OpenMsg = "Camera device service started"
 ReadMaxLimit = 256
 Timeout = 5000
 EnableAsyncReadings = true
@@ -46,7 +46,7 @@ Type = "consul"
 
 [Logging]
 RemoteURL = ''
-File = "./device-camera-bosch-service.log"
+File = "./device-camera-go-service.log"
 
 # Pre-defined Devices
 [[DeviceList]]
