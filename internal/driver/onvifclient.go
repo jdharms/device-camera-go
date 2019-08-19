@@ -1,177 +1,296 @@
 package driver
 
 import (
-	"github.com/atagirov/goonvif"
-	"github.com/atagirov/goonvif/Device"
-	"github.com/atagirov/goonvif/Media"
-	"github.com/atagirov/goonvif/xsd/onvif"
-	"github.com/beevik/etree"
+	"device-camera-go/internal/pkg/digest"
+	"encoding/json"
+	"fmt"
+	"github.com/atagirov/onvif4go"
+	"github.com/atagirov/onvif4go/device"
+	"github.com/atagirov/onvif4go/onvif"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
 	"io/ioutil"
 	"net/http"
-	"strings"
+	"time"
 )
 
 type OnvifClient struct {
-	ipAddress string
-	user      string
-	password  string
-	lc        logger.LoggingClient
+	ipAddress   string
+	user        string
+	password    string
+	onvifDevice *onvif4go.OnvifDevice
+	lc          logger.LoggingClient
+	digestClient digest.Client
 }
 
 func NewOnvifClient(ipAddress string, user string, password string, lc logger.LoggingClient) *OnvifClient {
-	return &OnvifClient{
+	c := OnvifClient{
 		ipAddress: ipAddress,
 		user:      user,
 		password:  password,
-		lc: lc,
+		lc:        lc,
 	}
+
+	dev := onvif4go.NewOnvifDevice(c.ipAddress)
+	dev.Auth(user, password)
+	err := dev.Initialize()
+	if err != nil {
+		lc.Error(fmt.Sprintf("Error initializing ONVIF Client: %v", err.Error()))
+		return nil
+	}
+
+	c.onvifDevice = dev
+
+	c.digestClient = digest.NewDClient(&http.Client{}, user, password)
+	return &c
 }
 
-func (c *OnvifClient) GetDeviceInformation() (map[string]string, error) {
-	// The goonvif library not exposing the onvif device as a public interface means
-	// we need to create a new device and authenticate in each function we make an onvif
-	// call.  Would probably be smart to change this behavior.
-	dev, err := goonvif.NewDevice(c.ipAddress)
+func (c *OnvifClient) GetDeviceInformation() (string, error) {
+	info, err := c.onvifDevice.Device.GetDeviceInformation()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	dev.Authenticate(c.user, c.password)
 
-	deviceInfoResp, err := dev.CallMethod(Device.GetDeviceInformation{})
+	deviceInfo, err := json.Marshal(info)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	doc := etree.NewDocument()
-	b, err := ioutil.ReadAll(deviceInfoResp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := doc.ReadFromBytes(b); err != nil {
-		return nil, err
-	}
-
-	deviceInfo := make(map[string]string)
-
-	getResponseElements := doc.FindElements("./Envelope/Body/GetDeviceInformationResponse/*")
-	for _, j := range getResponseElements {
-		deviceInfo[j.Tag] = j.Text()
-	}
-
-	return deviceInfo, nil
+	return string(deviceInfo), nil
 }
 
-func (c *OnvifClient) GetProfileInformation() ([]map[string]string, error) {
-	dev, err := goonvif.NewDevice(c.ipAddress)
+func (c *OnvifClient) GetProfileInformation() (string, error) {
+	profiles, err := c.onvifDevice.Media.GetProfiles()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	dev.Authenticate(c.user, c.password)
 
-	profilesResp, err := dev.CallMethod(Media.GetProfiles{})
+	mediaProfiles, err := json.Marshal(profiles)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	doc := etree.NewDocument()
-	b, err := ioutil.ReadAll(profilesResp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := doc.ReadFromBytes(b); err != nil {
-		return nil, err
-	}
-
-	getResponseElements := doc.FindElements("./Envelope/Body/GetProfilesResponse/*")
-	profileMaps := make([]map[string]string, 0)
-	for _, elem := range getResponseElements {
-		pMap := make(map[string]string)
-		pMap["name"] = elem.FindElement("./Name").Text()
-		pMap["encoding"] = elem.FindElement("./VideoEncoderConfiguration/Encoding").Text()
-		pMap["resolution"] = strings.Join(mapElementsToStrings(elem.FindElements("./VideoEncoderConfiguration/Resolution/*")), ", ")
-		token := elem.SelectAttr("token").Value
-
-		getStream := Media.GetStreamUri{
-			StreamSetup: onvif.StreamSetup{
-				Stream:    onvif.StreamType("RTP-Unicast"),
-				Transport: onvif.Transport{Protocol: "RTSP"},
-			},
-			ProfileToken: onvif.ReferenceToken(token),
-		}
-
-		getStreamResponse, err := dev.CallMethod(getStream)
-		if err != nil {
-			c.lc.Error("Error getting stream URI: %s", err.Error())
-			return nil, err
-		}
-
-		getImage := Media.GetSnapshotUri{
-			ProfileToken: onvif.ReferenceToken(token),
-		}
-
-		getImageResponse, err := dev.CallMethod(getImage)
-		if err != nil {
-			c.lc.Error(err.Error())
-		}
-
-		pMap["RTSPPath"] = c.getRTSP(getStreamResponse)
-		pMap["ImagePath"] = c.getImagePath(getImageResponse)
-
-		profileMaps = append(profileMaps, pMap)
-	}
-
-	return profileMaps, nil
+	return string(mediaProfiles), nil
 }
 
-func (c *OnvifClient) getRTSP(resp *http.Response) string {
-	doc := etree.NewDocument()
-	b, err := ioutil.ReadAll(resp.Body)
+func (c *OnvifClient) GetStreamURI() (string, error) {
+	profilesResp, err := c.onvifDevice.Media.GetProfiles()
 	if err != nil {
-		c.lc.Error(err.Error())
-		return ""
+		return "", err
 	}
 
-	err = doc.ReadFromBytes(b)
-	if err != nil {
-		c.lc.Error(err.Error())
-		return ""
+	if len(profilesResp.Profiles) == 0 {
+		return "", fmt.Errorf("no onvif profiles found")
 	}
 
-	elem := doc.FindElement("./Envelope/Body/GetStreamUriResponse/MediaUri/Uri")
-	if elem == nil {
-		return ""
+	token := profilesResp.Profiles[0].Token
+
+	fmt.Println(token)
+
+	uriResp, err := c.onvifDevice.Media.GetStreamURI(string(token), "RTP-Unicast", "RTSP")
+	if err != nil {
+		return "", fmt.Errorf("GetStreamURI failed: %v", err.Error())
 	}
-	return elem.Text()
+
+	uriJson, err := json.Marshal(uriResp)
+	if err != nil {
+		return "", fmt.Errorf("error marshaling stream URI to json: %v", err.Error())
+	}
+
+	return string(uriJson), nil
 }
 
-func (c *OnvifClient) getImagePath(resp *http.Response) string {
-	doc := etree.NewDocument()
-	b, err := ioutil.ReadAll(resp.Body)
+func (c *OnvifClient) GetSnapshot() ([]byte, error) {
+	profilesResp, err := c.onvifDevice.Media.GetProfiles()
 	if err != nil {
-		c.lc.Error(err.Error())
-		return ""
+		return nil, err
 	}
 
-	err = doc.ReadFromBytes(b)
-	if err != nil {
-		c.lc.Error(err.Error())
-		return ""
+	if len(profilesResp.Profiles) == 0 {
+		return nil, fmt.Errorf("no onvif profiles found")
 	}
 
-	elem := doc.FindElement("./Envelope/Body/GetSnapshotUriResponse/MediaUri/Uri")
-	if elem == nil {
-		return ""
+	token := profilesResp.Profiles[0].Token
+
+	uriResponse, err := c.onvifDevice.Media.GetSnapshotURI(string(token))
+	if err != nil {
+		return nil, err
 	}
-	return elem.Text()
+
+	url := uriResponse.MediaUri.Uri
+
+	req, err := http.NewRequest(http.MethodGet, string(url), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.digestClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	fmt.Println(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("http request for image failed with status %v", resp.StatusCode)
+	}
+
+	buf, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		return nil, fmt.Errorf("error reading http request: %v", err)
+	}
+
+	return buf, nil
 }
 
-func mapElementsToStrings(elems []*etree.Element) []string {
-	result := make([]string, 0)
-	for _, elem := range elems {
-		result = append(result, elem.Text())
+func (c *OnvifClient) GetSystemDateAndTime() (string, error) {
+	datetime, err := c.onvifDevice.Device.GetSystemDateAndTime()
+	if err != nil {
+		return "", err
 	}
-	return result
+
+	datetimeJson, err := json.Marshal(datetime)
+	if err != nil {
+		return "", err
+	}
+
+	return string(datetimeJson), nil
+}
+
+func (c *OnvifClient) GetHostname() (string, error) {
+	hostname, err := c.onvifDevice.Device.GetHostname()
+	if err != nil {
+		return "", err
+	}
+
+	hostnameJson, err := json.Marshal(hostname)
+	if err != nil {
+		return "", err
+	}
+
+	return string(hostnameJson), nil
+}
+
+func (c *OnvifClient) SetHostname(name string) (error) {
+	err := c.onvifDevice.Device.SetHostname(name)
+	return err
+}
+
+func (c *OnvifClient) SetSystemDateAndTime(datetime time.Time) error {
+	req, err := device.NewSetSystemDateAndTimeManual(datetime, "", false)
+	if err != nil {
+		c.lc.Error(fmt.Sprintf("Error creating SetSystemDateAndTime object: %v", err.Error()))
+		return err
+	}
+
+	err = c.onvifDevice.Device.SetSystemDateAndTime(req)
+	if err != nil {
+		c.lc.Error(fmt.Sprintf("Error calling SetSystemDateAndTime: %v", err.Error()))
+	}
+	return nil
+
+}
+func (c *OnvifClient) GetDNS() (string, error) {
+	dns, err := c.onvifDevice.Device.GetDNS()
+	if err != nil {
+		return "", err
+	}
+
+	dnsJson, err := json.Marshal(dns)
+	if err != nil {
+		return "", err
+	}
+
+	return string(dnsJson), nil
+}
+
+func (c *OnvifClient) GetNetworkInterfaces() (string, error) {
+	interfaces, err := c.onvifDevice.Device.GetNetworkInterfaces()
+	if err != nil {
+		return "", err
+	}
+
+	interfacesJson, err := json.Marshal(interfaces)
+	if err != nil {
+		return "", err
+	}
+
+	return string(interfacesJson), nil
+}
+
+func (c *OnvifClient) GetNetworkProtocols() (string, error) {
+	protocols, err := c.onvifDevice.Device.GetNetworkProtocols()
+	if err != nil {
+		return "", err
+	}
+
+	protocolsJson, err := json.Marshal(protocols)
+	if err != nil {
+		return "", err
+	}
+
+	return string(protocolsJson), nil
+}
+
+func (c *OnvifClient) GetNetworkDefaultGateway() (string, error) {
+	defaultGateway, err := c.onvifDevice.Device.GetNetworkDefaultGateway()
+	if err != nil {
+		return "", err
+	}
+
+	gatewayJson, err := json.Marshal(defaultGateway)
+	if err != nil {
+		return "", err
+	}
+
+	return string(gatewayJson), nil
+}
+
+func (c *OnvifClient) GetNTP() (string, error) {
+	ntp, err := c.onvifDevice.Device.GetNTP()
+	if err != nil {
+		return "", err
+	}
+
+	ntpJson, err := json.Marshal(ntp)
+	if err != nil {
+		return "", err
+	}
+
+	return string(ntpJson), nil
+}
+
+func (c *OnvifClient) Reboot() (string, error) {
+	reboot, err := c.onvifDevice.Device.SystemReboot()
+	if err != nil {
+		return "", err
+	}
+
+	rebootJson, err := json.Marshal(reboot)
+	if err != nil {
+		return "", err
+	}
+
+	return string(rebootJson), nil
+}
+
+func (c *OnvifClient) GetUsers() (string, error) {
+	users, err := c.onvifDevice.Device.GetUsers()
+	if err != nil {
+		return "", err
+	}
+
+	usersJson, err := json.Marshal(users)
+	if err != nil {
+		return "", err
+	}
+
+	return string(usersJson), nil
+}
+
+func (c *OnvifClient) CreateUser(user onvif.User) error {
+	err := c.onvifDevice.Device.CreateUser(user)
+	return err
 }

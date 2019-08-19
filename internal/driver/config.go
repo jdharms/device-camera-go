@@ -3,18 +3,18 @@ package driver
 import (
 	"flag"
 	"fmt"
-	"github.com/BurntSushi/toml"
 	"io/ioutil"
+
+	"github.com/BurntSushi/toml"
 )
 
 type configuration struct {
 	Camera CameraInfo
 }
 type CameraInfo struct {
-	User string
+	User     string
 	Password string
 }
-
 
 // LoadConfigFromFile use to load toml configuration
 func LoadConfigFromFile() (*configuration, error) {

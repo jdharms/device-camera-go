@@ -6,9 +6,13 @@ github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da/go.mod h1:Q73ZrmV
 github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
 github.com/atagirov/goonvif v0.0.0-20190226061606-e81fab7433da h1:YWYTZsgPfccgImswYrAagDYIwWtna+2AYCyASNnYQQA=
 github.com/atagirov/goonvif v0.0.0-20190226061606-e81fab7433da/go.mod h1:D8q93Vs2DCU+wfD9piZSqisjEWnwnvRJom4TN0SzAP0=
+github.com/atagirov/onvif4go v0.3.0 h1:57zBLpgW3Z8sRWSujZR/U+Pn9Hkh22mCVQ0nKETonkE=
+github.com/atagirov/onvif4go v0.3.0/go.mod h1:dn4uJZALr56oplg3TnzWq6H31lvI0xdIMTefz3pFIjQ=
 github.com/beevik/etree v1.1.0 h1:T0xke/WvNtMoCqgzPhkX2r4rjY3GDZFi+FjpRZY2Jbs=
 github.com/beevik/etree v1.1.0/go.mod h1:r8Aw8JqVegEf0w2fDnATrX9VpkMcyFeM0FhwO62wh+A=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
+github.com/brianolson/cbor_go v1.0.0 h1:CurpJr4z5P94x/CtFgM9tf9QEEfUBJSRxR/4jbftw0E=
+github.com/brianolson/cbor_go v1.0.0/go.mod h1:oGF4+yGIBUbkxYYGKSJRGIZ4Z91crezxGZAnnslEtT0=
 github.com/cenkalti/backoff v2.1.1+incompatible h1:tKJnvO2kl0zmb/jA5UKAt4VoEVw1qxKWjE/Bpp46npY=
 github.com/cenkalti/backoff v2.1.1+incompatible/go.mod h1:90ReRw6GdpyfrHakVjL/QHaoyV4aDUVVkXQJJJ3NXXM=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -17,8 +21,12 @@ github.com/edgexfoundry/device-sdk-go v0.0.0-20190522161733-b70462a1276d h1:7qp0
 github.com/edgexfoundry/device-sdk-go v0.0.0-20190522161733-b70462a1276d/go.mod h1:xC9G0map9bLEqOg622fnR77+E2pr4Cq1WBCYfwwXOyE=
 github.com/edgexfoundry/go-mod-core-contracts v0.0.0-20190521133417-c7e6b0d h1:SJioYjKL7XM7sgqh3r5BpjIlGuFkpge6RAew6Q1MKUY=
 github.com/edgexfoundry/go-mod-core-contracts v0.0.0-20190521133417-c7e6b0d/go.mod h1:wUlH4D1HdWNExL6Tel9enMmiWMpVnfPnyVttZ9Ap32M=
+github.com/edgexfoundry/go-mod-core-contracts v0.1.0 h1:GpmIN5RwtD+bQQYiC/1YChDhHFA402rg7muQl/mpIec=
+github.com/edgexfoundry/go-mod-core-contracts v0.1.0/go.mod h1:wUlH4D1HdWNExL6Tel9enMmiWMpVnfPnyVttZ9Ap32M=
 github.com/edgexfoundry/go-mod-registry v0.0.0-20190401195203-552208258719 h1:5ycQ5Hm83LFZOqI+8PpDBGC2tBdq62GQX4YPRPzxS9c=
 github.com/edgexfoundry/go-mod-registry v0.0.0-20190401195203-552208258719/go.mod h1:3w+ZfrsXXTDbKQ0cKClS2ujQXGoJpcvvB1OzgFNSYDg=
+github.com/edgexfoundry/go-mod-registry v0.1.0 h1:FkXAfbJsv97USbKMZo9D4rGzsQww58tyFYsBDkOEHss=
+github.com/edgexfoundry/go-mod-registry v0.1.0/go.mod h1:3w+ZfrsXXTDbKQ0cKClS2ujQXGoJpcvvB1OzgFNSYDg=
 github.com/elgs/gostrgen v0.0.0-20161222160715-9d61ae07eeae h1:3KvK2DmA7TxQ6PZ2f0rWbdqjgJhRcqgbY70bBeE4clI=
 github.com/elgs/gostrgen v0.0.0-20161222160715-9d61ae07eeae/go.mod h1:wruC5r2gHdr/JIUs5Rr1V45YtsAzKXZxAnn/5rPC97g=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=

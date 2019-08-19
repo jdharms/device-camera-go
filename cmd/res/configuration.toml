@@ -53,8 +53,14 @@ File = "./device-camera-bosch-service.log"
   Name = "Camera001"
   Profile = "camera-bosch"
   Description = "My test Bosch camera"
-  Labels = [ "camera", "bosch", "poe"]
   Location = "foo"
   [DeviceList.Protocols]
     [DeviceList.Protocols.HTTP]
       Address = "192.168.2.105"
+#  Name = "Camera001"
+#  Profile = "camera-axis"
+#  Description = "My test Axis camera"
+#  Location = "foo"
+#  [DeviceList.Protocols]
+#    [DeviceList.Protocols.HTTP]
+#      Address = "192.168.2.163"

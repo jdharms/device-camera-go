@@ -6,13 +6,14 @@
 package main
 
 import (
-	"device-camera-bosch/internal/driver"
 	"github.com/edgexfoundry/device-sdk-go/pkg/startup"
+
+	"device-camera-go/internal/driver"
 )
 
 const (
 	version     string = "0.1.0"
-	serviceName string = "device-camera-bosch"
+	serviceName string = "device-camera-go"
 )
 
 func main() {

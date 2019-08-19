@@ -4,11 +4,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package driver
+package bosch
 
 import (
 	"bytes"
-	"device-camera-bosch/internal/digest"
+	"device-camera-go/internal/pkg/client"
+	"device-camera-go/internal/pkg/digest"
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/xml"
@@ -193,18 +194,28 @@ type RcpClient struct {
 	asyncChan chan<- *ds_models.AsyncValues
 	lc        logger.LoggingClient
 
-	alarms    map[int]e_models.DeviceResource
-	counters  map[string]e_models.DeviceResource
+	alarms   map[int]e_models.DeviceResource
+	counters map[string]e_models.DeviceResource
 
-	alarmStates map[int]bool
+	alarmStates   map[int]bool
 	counterStates map[string]int
+
+	stop    chan bool
+	stopped chan bool
 }
 
-func NewRcpClient(asyncCh chan<- *ds_models.AsyncValues, lc logger.LoggingClient) *RcpClient {
+func NewClient(asyncCh chan<- *ds_models.AsyncValues, lc logger.LoggingClient) client.Client {
 	return &RcpClient{asyncChan: asyncCh, lc: lc}
 }
 
-func (rc *RcpClient) RcpCameraInit(edgexDevice e_models.Device, ipAddress string, username string, password string) (chan bool, chan bool) {
+func (rc *RcpClient) CameraRelease(force bool) {
+	close(rc.stop)
+	if !force {
+		<-rc.stopped
+	}
+}
+
+func (rc *RcpClient) CameraInit(edgexDevice e_models.Device, ipAddress string, username string, password string) {
 	if rc.client == nil {
 		rc.initializeDClient(username, password)
 	}
@@ -256,7 +267,7 @@ func (rc *RcpClient) RcpCameraInit(edgexDevice e_models.Device, ipAddress string
 	go func() {
 		ticks := time.Tick(time.Second * 5)
 
-		var max_errors = 5
+		var max_errors = 60
 		for max_errors > 0 {
 			select {
 			case <-ticks:
@@ -264,6 +275,8 @@ func (rc *RcpClient) RcpCameraInit(edgexDevice e_models.Device, ipAddress string
 				if err != nil {
 					rc.lc.Error("Error in RCP loop: %s", err.Error())
 					max_errors--
+				} else {
+					max_errors = 60
 				}
 			case <-stopchan:
 				// stop
@@ -272,7 +285,8 @@ func (rc *RcpClient) RcpCameraInit(edgexDevice e_models.Device, ipAddress string
 		}
 	}()
 
-	return stopchan, stoppedchan
+	rc.stop = stopchan
+	rc.stopped = stoppedchan
 }
 
 func (rc *RcpClient) initializeDClient(username string, password string) {
@@ -283,7 +297,7 @@ func (rc *RcpClient) setAlarmState(alarmType int, state bool) {
 	rc.alarmStates[alarmType] = state
 }
 
-func (rc *RcpClient) GetAlarmState(alarmType int) bool {
+func (rc *RcpClient) getAlarmState(alarmType int) bool {
 	return rc.alarmStates[alarmType]
 }
 
@@ -291,8 +305,41 @@ func (rc *RcpClient) setCounterState(counter string, count int) {
 	rc.counterStates[counter] = count
 }
 
-func (rc *RcpClient) GetCounterState(counter string) int {
+func (rc *RcpClient) getCounterState(counter string) int {
 	return rc.counterStates[counter]
+}
+
+func (rc *RcpClient) HandleReadCommand(req ds_models.CommandRequest) (*ds_models.CommandValue, error) {
+	var cv *ds_models.CommandValue
+	var err error
+
+	if alarmType, ok := req.Attributes["alarm_type"]; ok {
+		alarmType, err := strconv.Atoi(alarmType)
+		if err != nil {
+			return nil, err
+		}
+		data := rc.getAlarmState(alarmType)
+
+		cv, err = ds_models.NewBoolValue(req.DeviceResourceName, 0, data)
+		if err != nil {
+			return nil, err
+		}
+	} else if counterType, ok := req.Attributes["counter_name"]; ok {
+		data := rc.getCounterState(counterType)
+
+		cv, err = ds_models.NewUint32Value(req.DeviceResourceName, 0, uint32(data))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("rcp: unrecognized read command")
+	}
+
+	return cv, nil
+}
+
+func (rc *RcpClient) HandleWriteCommand(req ds_models.CommandRequest, param *ds_models.CommandValue) error {
+	return fmt.Errorf("rcp: unrecognized write command")
 }
 
 func (rc *RcpClient) commandValuesFromAlarms(alarms []Alarm, edgexDevice e_models.Device) ([]*ds_models.CommandValue, error) {
