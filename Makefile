@@ -2,7 +2,7 @@
 
 #GOOS=linux
 
-GO=CGO_ENABLED=0 go
+GO=CGO_ENABLED=0 GO111MODULE=on go
 
 MICROSERVICES=cmd/device-camera-go
 .PHONY: $(MICROSERVICES)
@@ -12,7 +12,6 @@ VERSION=$(shell cat ./VERSION)
 GOFLAGS=-ldflags "-X github.com/edgexfoundry/device-camera-go.Version=$(VERSION)"
 
 build: $(MICROSERVICES)
-	go build ./...
 
 cmd/device-camera-go:
 	$(GO) build $(GOFLAGS) -o $@ ./cmd
@@ -31,6 +30,8 @@ format:
 	gofmt -l .
 	[ "`gofmt -l .`" = "" ]
 
+update:
+	$(GO) mod download
 
 clean:
 	rm -f $(MICROSERVICES)

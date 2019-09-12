@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd cmd
 
 # Alternately use go run main.go or launch the binary from 'make build'

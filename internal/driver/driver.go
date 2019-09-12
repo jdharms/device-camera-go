@@ -6,17 +6,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/atagirov/onvif4go/onvif"
+	"github.com/faceterteam/onvif4go/onvif"
 	"github.com/edgexfoundry/device-sdk-go"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
-	"github.com/pkg/errors"
-	contract "github.com/edgexfoundry/go-mod-core-contracts/models"
 	sdkModel "github.com/edgexfoundry/device-sdk-go/pkg/models"
+	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
+	contract "github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/pkg/errors"
 
-	"device-camera-go/internal/pkg/axis"
-	"device-camera-go/internal/pkg/bosch"
-	"device-camera-go/internal/pkg/client"
-	"device-camera-go/internal/pkg/noop"
+	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/axis"
+	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/bosch"
+	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/client"
+	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/noop"
 )
 
 var once sync.Once
@@ -346,18 +346,10 @@ func structFromParam(param *sdkModel.CommandValue, v interface{}) error {
 // DisconnectDevice handles protocol-specific cleanup when a device
 // is removed.
 func (d *Driver) DisconnectDevice(deviceName string, protocols map[string]contract.ProtocolProperties) error {
-	errString := "no HTTP address found for device. Check configuration file"
-	if _, ok := protocols["HTTP"]; !ok {
-		d.lc.Error(errString)
-		return fmt.Errorf(errString)
+	addr, err := d.addrFromProtocols(protocols)
+	if err != nil {
+		return errors.Errorf("no address found for device: %v", err.Error())
 	}
-
-	if _, ok := protocols["HTTP"]["Address"]; !ok {
-		d.lc.Error(errString)
-		return fmt.Errorf(errString)
-	}
-
-	addr := protocols["HTTP"]["Address"]
 
 	shutdownClient(addr)
 	shutdownOnvifClient(addr)
@@ -401,21 +393,34 @@ func (d *Driver) Stop(force bool) error {
 // AddDevice is a callback function that is invoked
 // when a new Device associated with this Device Service is added
 func (d *Driver) AddDevice(deviceName string, protocols map[string]contract.ProtocolProperties, adminState contract.AdminState) error {
-	fmt.Printf("Added device: %v\n", deviceName)
+	addr, err := d.addrFromProtocols(protocols)
+	if err != nil {
+		return errors.Errorf("error adding device: %v", err.Error())
+	}
+
+	_, _, err = d.clientsFromAddr(addr, deviceName)
+	if err != nil {
+		return errors.Errorf("error adding device: %v", err.Error())
+	}
 	return nil
 }
 
 // UpdateDevice is a callback function that is invoked
 // when a Device associated with this Device Service is updated
 func (d *Driver) UpdateDevice(deviceName string, protocols map[string]contract.ProtocolProperties, adminState contract.AdminState) error {
-	fmt.Printf("Updated device: %v\n", deviceName)
 	return nil
 }
 
 // RemoveDevice is a callback function that is invoked
 // when a Device associated with this Device Service is removed
 func (d *Driver) RemoveDevice(deviceName string, protocols map[string]contract.ProtocolProperties) error {
-	fmt.Printf("Removed device: %v\n", deviceName)
+	addr, err := d.addrFromProtocols(protocols)
+	if err != nil {
+		return errors.Errorf("no address found for device: %v", err.Error())
+	}
+
+	shutdownClient(addr)
+	shutdownOnvifClient(addr)
 	return nil
 }
 

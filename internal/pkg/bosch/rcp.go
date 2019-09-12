@@ -8,21 +8,23 @@ package bosch
 
 import (
 	"bytes"
-	"device-camera-go/internal/pkg/client"
-	"device-camera-go/internal/pkg/digest"
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/xml"
 	"fmt"
-	ds_models "github.com/edgexfoundry/device-sdk-go/pkg/models"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
-	e_models "github.com/edgexfoundry/go-mod-core-contracts/models"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 	"unicode/utf16"
+
+	e_models "github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
+	ds_models "github.com/edgexfoundry/device-sdk-go/pkg/models"
+
+	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/digest"
+	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/client"
 )
 
 const (

@@ -8,7 +8,7 @@ package main
 import (
 	"github.com/edgexfoundry/device-sdk-go/pkg/startup"
 
-	"device-camera-go/internal/driver"
+	"github.com/edgexfoundry-holding/device-camera-go/internal/driver"
 )
 
 const (

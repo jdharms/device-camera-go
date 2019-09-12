@@ -1,16 +1,18 @@
 package driver
 
 import (
-	"device-camera-go/internal/pkg/digest"
 	"encoding/json"
 	"fmt"
-	"github.com/atagirov/onvif4go"
-	"github.com/atagirov/onvif4go/device"
-	"github.com/atagirov/onvif4go/onvif"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
+	"github.com/faceterteam/onvif4go"
+	"github.com/faceterteam/onvif4go/device"
+	"github.com/faceterteam/onvif4go/onvif"
+
+	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/digest"
 )
 
 type OnvifClient struct {

@@ -4,10 +4,6 @@ github.com/armon/circbuf v0.0.0-20150827004946-bbbad097214e/go.mod h1:3U/XgcO3hC
 github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da h1:8GUt8eRujhVEGZFFEjBj46YV4rDjvGrNxb0KMWYkL2I=
 github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da/go.mod h1:Q73ZrmVTwzkszR9V5SSuryQ31EELlFMUz1kKyl939pY=
 github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
-github.com/atagirov/goonvif v0.0.0-20190226061606-e81fab7433da h1:YWYTZsgPfccgImswYrAagDYIwWtna+2AYCyASNnYQQA=
-github.com/atagirov/goonvif v0.0.0-20190226061606-e81fab7433da/go.mod h1:D8q93Vs2DCU+wfD9piZSqisjEWnwnvRJom4TN0SzAP0=
-github.com/atagirov/onvif4go v0.3.0 h1:57zBLpgW3Z8sRWSujZR/U+Pn9Hkh22mCVQ0nKETonkE=
-github.com/atagirov/onvif4go v0.3.0/go.mod h1:dn4uJZALr56oplg3TnzWq6H31lvI0xdIMTefz3pFIjQ=
 github.com/beevik/etree v1.1.0 h1:T0xke/WvNtMoCqgzPhkX2r4rjY3GDZFi+FjpRZY2Jbs=
 github.com/beevik/etree v1.1.0/go.mod h1:r8Aw8JqVegEf0w2fDnATrX9VpkMcyFeM0FhwO62wh+A=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
@@ -23,12 +19,16 @@ github.com/edgexfoundry/go-mod-core-contracts v0.0.0-20190521133417-c7e6b0d h1:S
 github.com/edgexfoundry/go-mod-core-contracts v0.0.0-20190521133417-c7e6b0d/go.mod h1:wUlH4D1HdWNExL6Tel9enMmiWMpVnfPnyVttZ9Ap32M=
 github.com/edgexfoundry/go-mod-core-contracts v0.1.0 h1:GpmIN5RwtD+bQQYiC/1YChDhHFA402rg7muQl/mpIec=
 github.com/edgexfoundry/go-mod-core-contracts v0.1.0/go.mod h1:wUlH4D1HdWNExL6Tel9enMmiWMpVnfPnyVttZ9Ap32M=
+github.com/edgexfoundry/go-mod-core-contracts v0.1.16 h1:GHt/whi5tK8ggaQxC+/9X4ZUtcm9pJcMjjkoCbEvcsU=
+github.com/edgexfoundry/go-mod-core-contracts v0.1.16/go.mod h1:wUlH4D1HdWNExL6Tel9enMmiWMpVnfPnyVttZ9Ap32M=
 github.com/edgexfoundry/go-mod-registry v0.0.0-20190401195203-552208258719 h1:5ycQ5Hm83LFZOqI+8PpDBGC2tBdq62GQX4YPRPzxS9c=
 github.com/edgexfoundry/go-mod-registry v0.0.0-20190401195203-552208258719/go.mod h1:3w+ZfrsXXTDbKQ0cKClS2ujQXGoJpcvvB1OzgFNSYDg=
 github.com/edgexfoundry/go-mod-registry v0.1.0 h1:FkXAfbJsv97USbKMZo9D4rGzsQww58tyFYsBDkOEHss=
 github.com/edgexfoundry/go-mod-registry v0.1.0/go.mod h1:3w+ZfrsXXTDbKQ0cKClS2ujQXGoJpcvvB1OzgFNSYDg=
 github.com/elgs/gostrgen v0.0.0-20161222160715-9d61ae07eeae h1:3KvK2DmA7TxQ6PZ2f0rWbdqjgJhRcqgbY70bBeE4clI=
 github.com/elgs/gostrgen v0.0.0-20161222160715-9d61ae07eeae/go.mod h1:wruC5r2gHdr/JIUs5Rr1V45YtsAzKXZxAnn/5rPC97g=
+github.com/faceterteam/onvif4go v0.4.0 h1:VkbcPOZMfS6i7VQrB6nbUJ4lU5uS9QYTMS1OWMh1LaE=
+github.com/faceterteam/onvif4go v0.4.0/go.mod h1:/v7BVtwXH/ZxEn3QvScb3x4ZM0gP99EGnQaYHfaVs3w=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/go-kit/kit v0.8.0 h1:Wz+5lgoB0kkuqLEc6NVmwRknTKP6dTGbSqvhZtBI/j0=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
@@ -38,6 +38,7 @@ github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/me
 github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c/go.mod h1:lNA+9X1NB3Zf8V7Ke586lFgjr2dZNuvo3lPJSGZ5JPQ=
 github.com/google/uuid v1.1.0 h1:Jf4mxPC/ziBnoPIdpQdPJ9OeiomAUHLvxmPRSPH9m4s=
 github.com/google/uuid v1.1.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/gorilla/context v0.0.0-20181012153548-51ce91d2eadd h1:bB2XEQHhNsTTpqNzsq5ObUuqR7RNIdpm5Phb6AjeejE=
 github.com/gorilla/context v0.0.0-20181012153548-51ce91d2eadd/go.mod h1:kBGZzfjB9CEq2AlWe17Uuf7NDRt0dE0s8S51q0aT7Yg=
 github.com/gorilla/mux v1.6.2 h1:Pgr17XVTNXAk3q/r4CpKzC5xBM/qW1uVLV+IhRZpIIk=
 github.com/gorilla/mux v1.6.2/go.mod h1:1lud6UwP+6orDFRuTfBEV8e9/aOM/c4fVVCaMa2zaAs=
@@ -64,6 +65,7 @@ github.com/hashicorp/mdns v1.0.0/go.mod h1:tL+uN++7HEJ6SQLQ2/p+z2pH24WQKWjBPkE0m
 github.com/hashicorp/memberlist v0.1.3/go.mod h1:ajVTdAv/9Im8oMAAj5G31PhhMCZJV2pPBoIllUwCN7I=
 github.com/hashicorp/serf v0.8.2 h1:YZ7UKsJv+hKjqGVUUbtE3HNj79Eln2oQ75tniF6iPt0=
 github.com/hashicorp/serf v0.8.2/go.mod h1:6hOLApaqBFA1NXqRQAsxw9QxuDEvNxSQRwA/JwenrHc=
+github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515 h1:T+h1c/A9Gawja4Y9mFVWj2vyii2bbUNDw3kt9VxK2EY=
 github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515/go.mod h1:+0opPa2QZZtGFBFZlji/RkVcI2GknAs/DXo4wKdlNEc=
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
 github.com/mattn/go-isatty v0.0.3/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNxMWT7Zi4=
